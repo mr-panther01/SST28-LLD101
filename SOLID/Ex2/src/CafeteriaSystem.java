@@ -16,19 +16,15 @@ public class CafeteriaSystem {
     public void checkout(String customerType, List<OrderLine> lines) {
         String invId = "INV-" + (++invoiceSeq);
 
-        // 1. Calculate Subtotal
         double subtotal = 0.0;
         for (OrderLine l : lines) {
             subtotal += menu.get(l.itemId).price * l.qty;
         }
 
-        // 2. Run Business Rules (Tax/Discount)
         BillingResult result = calculator.calculate(customerType, subtotal, lines.size());
 
-        // 3. Format
         String printable = formatter.format(invId, lines, menu, result);
 
-        // 4. Persistence & I/O
         System.out.print(printable);
         store.save(invId, printable);
         System.out.println("Saved invoice: " + invId + " (lines=" + store.countLines(invId) + ")");
