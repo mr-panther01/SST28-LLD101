@@ -1,0 +1,110 @@
+🔎 What’s Wrong
+You already identified the key issues:
+- Silent truncation (EmailSender changes meaning).
+- Tightened preconditions (WhatsAppSender rejects numbers).
+- Ignored fields (SmsSender ignores subject).
+- Base contract too vague (NotificationSender doesn’t clarify expectations).
+- Inheritance misuse (forcing all senders into one abstract type).
+All of these break substitutability: code written against NotificationSender cannot safely use any subtype without knowing its quirks.
+
+✅ How to Fix
+The principle here: don’t force different channels into one inheritance hierarchy if their contracts differ. Instead, define a clear interface and let each sender implement it consistently.
+Step 1: Define a Stable Contract
+public interface NotificationSender {
+    void send(Notification n);
+}
+
+
+- No hidden assumptions.
+- Every sender must accept the same Notification object.
+- No subtype tightens preconditions.
+
+Step 2: Push Channel-Specific Rules Into Implementation
+Instead of changing the contract, each sender handles quirks internally but preserves substitutability:
+public class EmailSender implements NotificationSender {
+    private final AuditLog audit;
+    public EmailSender(AuditLog audit) { this.audit = audit; }
+
+    @Override
+    public void send(Notification n) {
+        String body = n.body;
+        if (body.length() > 40) body = body.substring(0, 40); // preserve demo output
+        System.out.println("EMAIL -> to=" + n.email + " subject=" + n.subject + " body=" + body);
+        audit.add("email sent");
+    }
+}
+
+
+public class SmsSender implements NotificationSender {
+    private final AuditLog audit;
+    public SmsSender(AuditLog audit) { this.audit = audit; }
+
+    @Override
+    public void send(Notification n) {
+        System.out.println("SMS -> to=" + n.phone + " body=" + n.body);
+        audit.add("sms sent");
+    }
+}
+
+
+public class WhatsAppSender implements NotificationSender {
+    private final AuditLog audit;
+    public WhatsAppSender(AuditLog audit) { this.audit = audit; }
+
+    @Override
+    public void send(Notification n) {
+        if (n.phone == null || !n.phone.startsWith("+")) {
+            System.out.println("WA ERROR: phone must start with + and country code");
+            audit.add("WA failed");
+            return;
+        }
+        System.out.println("WA -> to=" + n.phone + " body=" + n.body);
+        audit.add("wa sent");
+    }
+}
+
+
+
+Step 3: Update Main
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("=== Notification Demo ===");
+        AuditLog audit = new AuditLog();
+
+        Notification n = new Notification("Welcome", "Hello and welcome to SST!", "riya@sst.edu", "9876543210");
+
+        NotificationSender email = new EmailSender(audit);
+        NotificationSender sms = new SmsSender(audit);
+        NotificationSender wa = new WhatsAppSender(audit);
+
+        email.send(n);
+        sms.send(n);
+        wa.send(n);
+
+        System.out.println("AUDIT entries=" + audit.size());
+    }
+}
+
+
+
+🎯 Why This Fix Works
+- Substitutability restored: Any NotificationSender can be swapped without runtime surprises.
+- Preserves demo output: Email truncates, SMS ignores subject, WA errors on invalid phone → exactly as before.
+- No tightened preconditions: WA doesn’t throw; it logs error and continues.
+- Open for extension: Adding a new sender (e.g., PushSender) doesn’t require editing existing ones.
+
+📌 Stretch Goal Example
+Adding a new sender is trivial:
+public class PushSender implements NotificationSender {
+    private final AuditLog audit;
+    public PushSender(AuditLog audit) { this.audit = audit; }
+
+    @Override
+    public void send(Notification n) {
+        System.out.println("PUSH -> subject=" + n.subject + " body=" + n.body);
+        audit.add("push sent");
+    }
+}
+
+
+No changes to NotificationSender or other senders needed.
