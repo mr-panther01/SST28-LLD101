@@ -1,0 +1,69 @@
+ The Question
+We have a reporting tool that exports student performance data into multiple formats (PDF, CSV, JSON). The hierarchy is:
+- Exporter (base class, abstract export)
+- PdfExporter, CsvExporter, JsonExporter (subclasses)
+- Main demonstrates usage
+The exercise asks us to analyze Liskov Substitution Principle (LSP) violations and refactor so all exporters honor the same contract.
+
+⚠️ The Problem
+Currently, each subclass breaks the base contract in different ways:
+- PdfExporter: Tightens preconditions → throws error if body > 20 chars.
+- CsvExporter: Corrupts data → replaces commas/newlines, silently changing meaning.
+- JsonExporter: Inconsistent null handling → returns empty result instead of error.
+- Exporter base class: No explicit contract → callers don’t know what to expect.
+- Main: Needs format-specific workarounds → violates substitutability.
+This means LSP is broken: subclasses cannot be safely substituted for the base class.
+
+✅ The Solution
+We fix this by:
+- Defining a clear base contract in Exporter:
+- Preconditions: ExportRequest must not be null.
+- Postconditions: Always return a non-null ExportResult with valid contentType and bytes.
+- Errors: If unsupported, throw a documented exception (not silent corruption).
+- Refactoring exporters:
+- PdfExporter: Instead of throwing, delegate to a “PdfEncoder” that enforces limits, but still return a valid ExportResult.
+- CsvExporter: Encode properly (escape commas/newlines) instead of lossy replacement.
+- JsonExporter: Handle null consistently (throw exception or encode empty string).
+- All exporters now honor the same contract.
+- Composition over inheritance:
+- Separate “format encoding” (CSV, JSON, PDF) from “delivery constraints” (size limits).
+- Exporter delegates to an encoder, ensuring consistent contract.
+- Keep outputs identical for current inputs (so Main’s sample output remains unchanged).
+
+BEFORE (LSP Violations)
+ -------------------------
+ | Exporter (abstract)   |
+ -------------------------
+       /       |       \
+      /        |        \
+ PdfExporter  CsvExporter  JsonExporter
+   (throws)   (corrupts)   (inconsistent)
+
+Problems:
+- Tightened preconditions
+- Silent data corruption
+- Inconsistent null handling
+- No documented contract
+
+AFTER (LSP Compliant)
+ -------------------------
+ | Exporter (abstract)   |
+ | Contract:             |
+ | - req != null         |
+ | - returns valid result|
+ -------------------------
+       /       |       \
+      /        |        \
+ PdfExporter  CsvExporter  JsonExporter
+   (delegates to encoder, consistent contract)
+
+Encoders:
+ - PdfEncoder (size limit handling)
+ - CsvEncoder (proper escaping)
+ - JsonEncoder (consistent null handling)
+
+Benefits:
+- Clear contract
+- No surprises
+- Substitutability preserved
+- Easy to add new exporters
