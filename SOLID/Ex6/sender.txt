@@ -105,6 +105,44 @@ public class PushSender implements NotificationSender {
         audit.add("push sent");
     }
 }
+            [NotificationSender]  ← abstract base class
+                  send(Notification)
 
-
-No changes to NotificationSender or other senders needed.
+        ┌────────────┬──────────────┬─────────────┐
+        ↓            ↓              ↓
+[EmailSender]   [SmsSender]   [WhatsAppSender]
+  - silently      - ignores      - throws error if
+    truncates       subject        phone not in +E.164
+    body            field          format
+
+Caller expects:
+- subject used
+- body preserved
+- phone accepted
+
+But:
+- Email changes meaning
+- SMS discards subject
+- WA tightens precondition
+→ Caller must know subtype quirks
+→ Violates substitutability
+
+            [NotificationSender] ← interface
+                  send(Notification)
+
+        ┌────────────┬──────────────┬─────────────┐
+        ↓            ↓              ↓
+[EmailSender]   [SmsSender]   [WhatsAppSender]
+  - truncates     - ignores      - logs error if
+    visibly         subject        phone invalid
+  - preserves     - consistent   - no exception thrown
+    contract        contract       → safe fallback
+
+Caller expects:
+- Same Notification structure
+- No runtime surprises
+- Consistent behavior
+
+→ All senders uphold base contract
+→ Caller can substitute freely
+→ LSP preserved
