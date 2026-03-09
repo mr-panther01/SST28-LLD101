@@ -1,14 +1,5 @@
 package com.example.reports;
 
-/**
- * CURRENT STATE (BROKEN ON PURPOSE):
- * - Concrete class used directly by clients
- * - Expensive load happens every time display() is called
- * - No access control
- *
- * TODO (student):
- * - Convert this into the RealSubject behind a Proxy, or replace with RealReport.
- */
 public class ReportFile {
 
     private final String reportId;
