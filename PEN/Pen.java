@@ -35,6 +35,39 @@ abstract class Pen {
     public abstract void write();
 
     // Getters and Setters
-    public Refill getRefill() { return refill; }
-    public boolean isOpen() { return isOpen; }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public Refill getRefill() {
+        return refill;
+    }
+
+    public void setRefill(Refill refill) {
+        this.refill = refill;
+    }
+
+    public boolean isOpen() {
+        return isOpen;
+    }
 }

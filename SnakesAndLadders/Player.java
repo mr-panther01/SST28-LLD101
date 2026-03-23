@@ -5,24 +5,27 @@ public class Player {
     private int position = 0;
     private boolean hasWon = false;
 
-    public Player(String name) { this.name = name; }
-    // Getters and Setters...
+    public Player(String name) {
+        this.name = name;
+    }
 
     public int getPosition() {
-        throw new UnsupportedOperationException("Unimplemented method 'getPosition'");
+        return position;
     }
 
     public void setPosition(int nextPos) {
-        throw new UnsupportedOperationException("Unimplemented method 'setPosition'");
+        this.position = nextPos;
     }
 
-    public void setHasWon(boolean b) {
-        throw new UnsupportedOperationException("Unimplemented method 'setHasWon'");
+    public boolean isHasWon() {
+        return hasWon;
+    }
+
+    public void setHasWon(boolean hasWon) {
+        this.hasWon = hasWon;
     }
 
     public String getName() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getName'");
+        return name;
     }
-
 }
