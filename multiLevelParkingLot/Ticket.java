@@ -15,6 +15,31 @@ public class Ticket {
         this.entryTime = entryTime;
     }
 
+    public String getTicketID() {
+        return ticketID;
+    }
+
+    public void setTicketID(String ticketID) {
+        this.ticketID = ticketID;
+    }
+
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
+
     public ParkingSlot getAssignedSlot() { return assignedSlot; }
+
+    public void setAssignedSlot(ParkingSlot assignedSlot) {
+        this.assignedSlot = assignedSlot;
+    }
+
     public LocalDateTime getEntryTime() { return entryTime; }
+
+    public void setEntryTime(LocalDateTime entryTime) {
+        this.entryTime = entryTime;
+    }
 }

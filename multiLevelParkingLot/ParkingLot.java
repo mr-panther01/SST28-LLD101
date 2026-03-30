@@ -14,6 +14,30 @@ public class ParkingLot {
         gates = new HashSet<>();
     }
 
+    public Set<Integer> getGates() {
+        return gates;
+    }
+
+    public void setGates(Set<Integer> gates) {
+        this.gates = gates;
+    }
+
+    public void addGate(int gateID) {
+        gates.add(gateID);
+    }
+
+    public void removeGate(int gateID) {
+        gates.remove(gateID);
+    }
+
+    public List<ParkingSlot> getSlots() {
+        return slots;
+    }
+
+    public void setSlots(List<ParkingSlot> slots) {
+        this.slots = slots;
+    }
+
     public static synchronized ParkingLot getInstance() {
         if (instance == null) instance = new ParkingLot();
         return instance;
